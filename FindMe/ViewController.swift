@@ -20,6 +20,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var meButton: UIButton!
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
     @IBOutlet weak var lifeView: UIView!
+    @IBOutlet weak var remainingTime: UIProgressView!
     
     var meButtonColor: UIColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0)
     var saveColorGreen: [CGFloat] = []
@@ -34,12 +35,14 @@ class ViewController: UIViewController {
     var reset = false
     
     var level: Level = .green
+    var gameTimer: Timer = Timer()
     
     //setting
-    let countIncorrectButton = 1
+    let countIncorrectButton = 14
     let setStartingLife: Int = 10
     let maxRandomMinusLife: Int = 5
     var life: Int = 0
+    let oneCycleTime: Float = 5
     
     override var prefersStatusBarHidden: Bool {
         return true
@@ -59,13 +62,16 @@ class ViewController: UIViewController {
         // starting mebutton color
         meButtonColor = randomColor()
         meButton.backgroundColor = meButtonColor
-        print(meButtonColor)
         
         
         createIncorrectButton()
         
+//        remainingTime.setProgress(true, animated: true)
+        remainingTime.alpha = 0
+        remainingTime.setProgress(1, animated: true)
+//        remainingTime.progress = 1
         //timer on delay start animation
-        //        Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(startAnimation), userInfo: nil, repeats: false)
+//        runTimer()
         
         //create loading indicator
         loadingIndicator.center = view.center
@@ -81,6 +87,30 @@ class ViewController: UIViewController {
         }
     }
     
+    //MARK:- manage game timer
+    func runTimer() {
+        gameTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(countdownTimer(timer:)), userInfo: nil, repeats: true)
+    }
+    
+    @objc func countdownTimer(timer: Timer) {
+        let decreaseTime = 1 / oneCycleTime
+        print(decreaseTime)
+        if remainingTime.progress > 0 {
+//            remainingTime.progress -= decreaseTime
+            remainingTime.setProgress((remainingTime.progress - decreaseTime), animated: true)
+        } else {
+            gameTimer.invalidate()
+            print("finish")
+            incorrectAction()
+        }
+        print(remainingTime.progress)
+    }
+    
+    func resetTimer() {
+        remainingTime.setProgress(1, animated: true)
+        runTimer()
+    }
+    
     
     //MARK:- manage random
     func randomCoor(backView: UIView) -> CGRect {
@@ -88,7 +118,7 @@ class ViewController: UIViewController {
         let ranH = ranW
         
         let ranX = CGFloat.random(in: 0...(backView.frame.width - ranW))
-        let ranY = CGFloat.random(in: 72...(backView.frame.height - ranH - 50))
+        let ranY = CGFloat.random(in: 80...(backView.frame.height - ranH - 50))
         
         return CGRect(x: ranX, y: ranY, width: ranW, height: ranH)
     }
@@ -192,21 +222,6 @@ class ViewController: UIViewController {
         }
     }
     
-    func reappearIncorrectButton() {
-        for view in self.view.subviews as [UIView] {
-            if let btn = view as? UIButton {
-                if (btn.tag != 1) {
-                    UIView.animate(withDuration: 0.2) {
-                        btn.alpha = 1
-                        
-                        btn.backgroundColor = self.randomColor()
-                    }
-                }
-                self.view.sendSubviewToBack(self.meButton)
-            }
-        }
-    }
-    
     @objc func incorrectButtonAction(sender: UIButton!) {
         incorrectAction()
     }
@@ -214,6 +229,7 @@ class ViewController: UIViewController {
     func incorrectAction() {
         life -= Int.random(in: 1 ... maxRandomMinusLife)
         lifeUpdate()
+        
         //sound error + animate
         playSound(name: "error")
         AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
@@ -221,16 +237,17 @@ class ViewController: UIViewController {
             self.view.backgroundColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
             self.incorrectAnimation()
         }) { (finished) in
-            //self.recreateincorrectButton()
             UIView.animate(withDuration: 0.2, animations: {
                 self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
             }, completion: { (finished) in
             })
         }
-        //        print(life)
+        
         
         if life <= 0 {
             gameOver()
+        } else {
+            resetTimer()
         }
     }
     
@@ -333,6 +350,8 @@ class ViewController: UIViewController {
                     }
                 }
             })
+            self.remainingTime.alpha = 1
+            self.runTimer()
         }
     }
     
@@ -354,17 +373,13 @@ class ViewController: UIViewController {
     
     //MARK:- manage me button
     @IBAction func meButtonDidTap(_ sender: Any) {
-        print("\(startingTap)     \(nextLevel)     \(reset)")
         if reset {
-            print(level)
             // mebutton color
             meButtonColor = randomColor()
-            print(meButtonColor)
             meButton.backgroundColor = meButtonColor
             life = setStartingLife
             createlife()
             createIncorrectButton()
-//            reappearIncorrectButton()
             
             UIView.animate(withDuration: 1, delay: 0, animations: {
                 self.incorrectAnimation()
@@ -376,7 +391,6 @@ class ViewController: UIViewController {
             
             if !nextLevel {
                 UIView.animate(withDuration: 1, delay: 0, animations: {
-//                    self.incorrectAnimation()
                     self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
                 }, completion: { (finish) in
                     self.startAnimation()
@@ -384,7 +398,6 @@ class ViewController: UIViewController {
             } else {
                 createlife()
                 createIncorrectButton()
-//                reappearIncorrectButton()
                 
                 UIView.animate(withDuration: 1) {
                     self.startAnimation()
@@ -392,10 +405,9 @@ class ViewController: UIViewController {
             }
             
             startingTap = false
-            print("\(startingTap)     \(nextLevel)     \(reset)")
         } else {
             if !nextLevel {
-                
+                //win level
                 meButtonBackgroundAnimate()
                 view.bringSubviewToFront(meButton)
                 
@@ -408,24 +420,20 @@ class ViewController: UIViewController {
                     level = .green
                 }
                 
-                //            print(level)
-                
                 nextLevel = true
                 
                 // mebutton color
                 meButtonColor = randomColor()
                 meButton.backgroundColor = meButtonColor
                 
-                //            life = setStartingLife
-                
                 recenterMeButton()
                 lifeUpdate()
                 startNewLevel()
             } else {
                 
+                //start next level
                 createlife()
                 createIncorrectButton()
-//                reappearIncorrectButton()
                 
                 UIView.animate(withDuration: 1) {
                     self.startAnimation()
@@ -520,7 +528,6 @@ class ViewController: UIViewController {
     func restart() {
         //life button
         life = setStartingLife
-//        lifeUpdate()
         createlife()
         
         // starting mebutton position
@@ -535,13 +542,6 @@ class ViewController: UIViewController {
                 btn.alpha = 0
             }
         }
-        
-//        for view in self.lifeView.subviews as [UIView] {
-//            if let btn = view as? UIButton {
-//                btn.alpha = 0
-//            }
-//        }
-        
         createFailedAndRestart()
     }
     
