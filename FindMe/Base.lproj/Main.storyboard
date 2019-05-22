@@ -26,7 +26,7 @@
                                     <action selector="correctButtonDidTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="unp-il-vvo"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" tag="2" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CYH-SU-Ksv">
+                            <button hidden="YES" opaque="NO" tag="2" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CYH-SU-Ksv">
                                 <rect key="frame" x="201" y="571" width="75" height="75"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.51372549020000002" green="0.33556681869999999" blue="0.1058013365" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>

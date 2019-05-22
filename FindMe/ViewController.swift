@@ -10,11 +10,11 @@ import UIKit
 import AVFoundation
 import AudioToolbox
 
-//enum level {
-//    case .green
-//    case .red
-//    case
-//}
+enum Level {
+    case green
+    case red
+    case blue
+}
 
 class ViewController: UIViewController {
     @IBOutlet weak var meButton: UIButton!
@@ -24,10 +24,12 @@ class ViewController: UIViewController {
     
     var CorretButtonColor: UIColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0)
     
-    var firstTap = false
+    var startingTap = true
+    
+    var level: Level = .green
     
     //setting
-    let countBubble = 18
+    let countBubble = 19
     let setStartingLife: Int = 10
     let maxRandomMinusLife: Int = 5
     var life: Int = 0
@@ -36,29 +38,16 @@ class ViewController: UIViewController {
         return true
     }
     
-    func restart() {
-        //life button
-        createlife()
-        
-        // starting mebutton position
-        meButton.frame = CGRect(x: 0, y: 0, width: 150, height: 150)
-        meButton.center = view.center
-        meButton.layer.cornerRadius = meButton.frame.width / 2
-        meButton.alpha = 1
-        firstTap = false
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
         //life button
+        life = setStartingLife
         createlife()
         
         // starting mebutton position
-        meButton.frame = CGRect(x: 0, y: 0, width: 150, height: 150)
-        meButton.center = view.center
-        meButton.layer.cornerRadius = meButton.frame.width / 2
+        recenterMeButton()
         
         // starting mebutton color
         CorretButtonColor = randomColor()
@@ -121,7 +110,7 @@ class ViewController: UIViewController {
             
             self.lifeView.addSubview(lifeButton)
         }
-        life = setStartingLife
+//        life = setStartingLife
     }
     
     func lifeViewUpdate() {
@@ -182,8 +171,30 @@ class ViewController: UIViewController {
                 btn.removeFromSuperview()
             }
         }
+        nextLevel = false
+        level = .green
+        
+        saveColorGreen.removeAll()
+        saveColorRed.removeAll()
+        saveColorBlue.removeAll()
         
         restart()
+    }
+    
+    func recenterMeButton() {
+        // starting mebutton position
+        meButton.frame = CGRect(x: 0, y: 0, width: 150, height: 150)
+        meButton.center = view.center
+        meButton.layer.cornerRadius = meButton.frame.width / 2
+        meButton.alpha = 1
+    }
+    
+    func restart() {
+        //life button
+        createlife()
+        
+        // starting mebutton position
+        recenterMeButton()
     }
     
     @objc func startAnimation() {
@@ -203,8 +214,6 @@ class ViewController: UIViewController {
             }
         }) { (finish) in
             self.shuffleBubble()
-            //            self.incorrectAnimation()
-            //            self.animateMeAndHideButton()
         }
     }
     
@@ -291,22 +300,65 @@ class ViewController: UIViewController {
         return CGRect(x: ranX, y: ranY, width: ranW, height: ranH)
     }
     
-    var saveColor: [CGFloat] = []
+    var saveColorGreen: [CGFloat] = []
+    var saveColorRed: [CGFloat] = []
+    var saveColorBlue: [CGFloat] = []
     
     func randomColor() -> UIColor {
-        let randomRed: CGFloat = 0.5//CGFloat.random(in: 0.01...1.0)
+        var randomRed: CGFloat = CGFloat.random(in: 0.5...1.0)
+        for color in saveColorRed {
+            while (randomRed == color) {
+                randomRed = CGFloat.random(in: 0.5...1.0)
+            }
+            saveColorRed.append(randomRed)
+        }
         
         var randomGreen: CGFloat = CGFloat.random(in: 0.5...1.0)
-        for color in saveColor {
+        for color in saveColorGreen {
             while (randomGreen == color) {
                 randomGreen = CGFloat.random(in: 0.5...1.0)
             }
-            saveColor.append(randomGreen)
+            saveColorGreen.append(randomGreen)
         }
         
-        let randomBlue: CGFloat = 0.0//CGFloat.random(in: 0.01...1.0)
+        var randomBlue: CGFloat = CGFloat.random(in: 0.5...1.0)
+        for color in saveColorBlue {
+            while (randomBlue == color) {
+                randomBlue = CGFloat.random(in: 0.5...1.0)
+            }
+            saveColorBlue.append(randomGreen)
+        }
         
         let ranAlpha:CGFloat = 1.0 //CGFloat.random(in: 0.1...1.0)
+        
+        
+        switch level {
+        case .green :
+            randomRed = 0.5
+            randomBlue = 0.0
+        case .red :
+            randomGreen = 0.5
+            randomBlue = 0.0
+        case .blue :
+            randomRed = 0.5
+            randomGreen = 0.0
+        }
+        
+        
+        
+//        let randomRed: CGFloat = 0.5//CGFloat.random(in: 0.01...1.0)
+//
+//        var randomGreen: CGFloat = CGFloat.random(in: 0.5...1.0)
+//        for color in saveColor {
+//            while (randomGreen == color) {
+//                randomGreen = CGFloat.random(in: 0.5...1.0)
+//            }
+//            saveColor.append(randomGreen)
+//        }
+//
+//        let randomBlue: CGFloat = 0.0//CGFloat.random(in: 0.01...1.0)
+//
+//        let ranAlpha:CGFloat = 1.0 //CGFloat.random(in: 0.1...1.0)
         
         return UIColor(red: randomRed, green: randomGreen, blue: randomBlue, alpha: ranAlpha)
     }
@@ -315,17 +367,18 @@ class ViewController: UIViewController {
         for _ in 1...countBubble {
             let addButton = UIButton()
             
+            addButton.backgroundColor = randomColor()
+            
             addButton.frame = randomCoor(backView: view)
             addButton.layer.cornerRadius = addButton.frame.width / 2
             
-            addButton.backgroundColor = randomColor()
             addButton.addTarget(self, action: #selector(bubbleAction), for: .touchUpInside)
             
             addButton.alpha = 0
             
             self.view.addSubview(addButton)
         }
-        saveColor.removeAll()
+//        saveColorGreen.removeAll()
     }
     
     func recreateRandomButton() {
@@ -369,7 +422,7 @@ class ViewController: UIViewController {
     }
     
     func incorrectAction() {
-        life -= Int.random(in: 0 ... maxRandomMinusLife)
+        life -= Int.random(in: 1 ... maxRandomMinusLife)
         lifeViewUpdate()
         //sound error + animate
         playSound(name: "error")
@@ -414,19 +467,6 @@ class ViewController: UIViewController {
     func gameOver() {
         for view in self.view.subviews as [UIView] {
             if let btn = view as? UIButton {
-//                if (btn.tag != 3) && (btn.tag != 4) {
-//                    UIView.animate(withDuration: 0.2) {
-//                        btn.frame = self.randomCoor(backView: self.view)
-//                        btn.layer.cornerRadius = btn.frame.width / 2
-//
-//                        btn.backgroundColor = self.randomColor()
-//                    }
-//                } else {
-//                    self.view.sendSubviewToBack(meButton)
-//                    btn.alpha = 0
-//                } else {
-//                    btn.alpha = 1
-//                }
                 btn.alpha = 0
             }
         }
@@ -450,22 +490,105 @@ class ViewController: UIViewController {
         }
     }
     
+    func startNewLevel() {
+        for view in self.view.subviews as [UIView] {
+            if let btn = view as? UIButton {
+                if btn.tag != 1 {
+                    btn.removeFromSuperview()
+                }
+            }
+        }
+        
+//        for view in self.lifeView.subviews as [UIView] {
+//            if let btn = view as? UIButton {
+//                btn.removeFromSuperview()
+//            }
+//        }
+        
+        startingTap = true
+    }
+    
+    var nextLevel = false
+    
     
     @IBAction func correctButtonDidTap(_ sender: Any) {
-        if firstTap {
-            correctAction()
-            view.bringSubviewToFront(meButton)
-            
+        print("\(startingTap)     \(nextLevel)")
+        if !startingTap && !nextLevel {
+            print(level)
+            // mebutton color
+            CorretButtonColor = randomColor()
+            print(CorretButtonColor)
+            meButton.backgroundColor = CorretButtonColor
             life = setStartingLife
-            lifeViewUpdate()
-        } else {
+            
+            createlife()
+            recreateRandomButton()
+            
             UIView.animate(withDuration: 1, delay: 0, animations: {
                 self.incorrectAnimation()
-                self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
+//                self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
             }, completion: { (finish) in
                 self.startAnimation()
             })
-            firstTap = true
+        }
+        
+        if startingTap {
+            
+            if !nextLevel {
+                UIView.animate(withDuration: 1, delay: 0, animations: {
+                    self.incorrectAnimation()
+                    self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
+                }, completion: { (finish) in
+                    self.startAnimation()
+                })
+            } else {
+                
+                createlife()
+                createRandomButton()
+                
+                UIView.animate(withDuration: 1) {
+                    self.startAnimation()
+                }
+            }
+            
+            startingTap = false
+        } else {
+            if !nextLevel {
+                
+                correctAction()
+                view.bringSubviewToFront(meButton)
+                
+                switch level {
+                case .green :
+                    level = .red
+                case .red :
+                    level = .blue
+                case .blue :
+                    level = .green
+                }
+                
+                //            print(level)
+                
+                nextLevel = true
+                
+                // mebutton color
+                CorretButtonColor = randomColor()
+                meButton.backgroundColor = CorretButtonColor
+                
+                //            life = setStartingLife
+                
+                recenterMeButton()
+                lifeViewUpdate()
+                startNewLevel()
+            } else {
+                
+                createlife()
+                createRandomButton()
+                
+                UIView.animate(withDuration: 1) {
+                    self.startAnimation()
+                }
+            }
         }
     }
     
@@ -476,8 +599,8 @@ class ViewController: UIViewController {
             self.meButton.frame = randomXY
             self.meButton.layer.cornerRadius = self.meButton.frame.width / 2
             
-            self.hideButton.frame = CGRect(x: self.meButton.frame.minX + 25, y: self.meButton.frame.minY + 25, width: self.meButton.frame.width + 10, height: self.meButton.frame.height + 10)
-            self.hideButton.layer.cornerRadius = self.hideButton.frame.width / 2
+//            self.hideButton.frame = CGRect(x: self.meButton.frame.minX + 25, y: self.meButton.frame.minY + 25, width: self.meButton.frame.width + 10, height: self.meButton.frame.height + 10)
+//            self.hideButton.layer.cornerRadius = self.hideButton.frame.width / 2
         }
     }
     
