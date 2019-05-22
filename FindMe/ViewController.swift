@@ -29,7 +29,7 @@ class ViewController: UIViewController {
     var level: Level = .green
     
     //setting
-    let countBubble = 19
+    let countBubble = 1
     let setStartingLife: Int = 10
     let maxRandomMinusLife: Int = 5
     var life: Int = 0
@@ -110,26 +110,22 @@ class ViewController: UIViewController {
             
             self.lifeView.addSubview(lifeButton)
         }
-//        life = setStartingLife
     }
     
     func lifeViewUpdate() {
         if life < 0 {
             life = 0
         }
-//        var s: String = ""
+        
         for view in self.lifeView.subviews as [UIView] {
             if let btn = view as? UIButton {
                 if btn.tag <= life {
                     btn.backgroundColor = #colorLiteral(red: 0.8078431487, green: 0.02745098062, blue: 0.3333333433, alpha: 1)
-//                    s += "pink "
                 } else {
                     btn.backgroundColor = nil
-//                    s += "kosong "
                 }
             }
         }
-//        print(s)
     }
     
     func createFailedAndRestart() {
@@ -195,26 +191,8 @@ class ViewController: UIViewController {
         
         // starting mebutton position
         recenterMeButton()
-    }
-    
-    @objc func startAnimation() {
-        UIView.animate(withDuration: 1, animations: {
-            self.meButton.alpha = 1
-            for view in self.view.subviews as [UIView] {
-                if let btn = view as? UIButton {
-                    if (btn.tag != 1) {
-                        UIView.animate(withDuration: 0.2) {
-                            btn.alpha = 1
-                            
-                            btn.backgroundColor = self.randomColor()
-                        }
-                    }
-                    self.view.sendSubviewToBack(self.meButton)
-                }
-            }
-        }) { (finish) in
-            self.shuffleBubble()
-        }
+        
+        reset = true
     }
     
     func shuffleBubble() {
@@ -290,6 +268,27 @@ class ViewController: UIViewController {
         }
     }
     
+    @objc func startAnimation() {
+        UIView.animate(withDuration: 1, animations: {
+            self.meButton.alpha = 1
+            for view in self.view.subviews as [UIView] {
+                if let btn = view as? UIButton {
+                    if (btn.tag != 1) {
+                        UIView.animate(withDuration: 0.2) {
+                            btn.alpha = 1
+                            
+                            btn.backgroundColor = self.randomColor()
+                        }
+                    }
+                    self.view.sendSubviewToBack(self.meButton)
+                }
+            }
+        }) { (finish) in
+            self.shuffleBubble()
+        }
+    }
+    
+    
     func randomCoor(backView: UIView) -> CGRect {
         let ranW = CGFloat.random(in: 50...150)
         let ranH = ranW
@@ -329,7 +328,7 @@ class ViewController: UIViewController {
             saveColorBlue.append(randomGreen)
         }
         
-        let ranAlpha:CGFloat = 1.0 //CGFloat.random(in: 0.1...1.0)
+        let ranAlpha:CGFloat = 1.0
         
         
         switch level {
@@ -343,22 +342,6 @@ class ViewController: UIViewController {
             randomRed = 0.5
             randomGreen = 0.0
         }
-        
-        
-        
-//        let randomRed: CGFloat = 0.5//CGFloat.random(in: 0.01...1.0)
-//
-//        var randomGreen: CGFloat = CGFloat.random(in: 0.5...1.0)
-//        for color in saveColor {
-//            while (randomGreen == color) {
-//                randomGreen = CGFloat.random(in: 0.5...1.0)
-//            }
-//            saveColor.append(randomGreen)
-//        }
-//
-//        let randomBlue: CGFloat = 0.0//CGFloat.random(in: 0.01...1.0)
-//
-//        let ranAlpha:CGFloat = 1.0 //CGFloat.random(in: 0.1...1.0)
         
         return UIColor(red: randomRed, green: randomGreen, blue: randomBlue, alpha: ranAlpha)
     }
@@ -378,18 +361,17 @@ class ViewController: UIViewController {
             
             self.view.addSubview(addButton)
         }
-//        saveColorGreen.removeAll()
     }
     
-    func recreateRandomButton() {
-        for view in view.subviews{
-            if view.tag != 1 {
-                view.removeFromSuperview()
-            }
-        }
-        
-        createRandomButton()
-    }
+//    func recreateRandomButton() {
+//        for view in view.subviews{
+//            if view.tag != 1 {
+//                view.removeFromSuperview()
+//            }
+//        }
+//
+//        createRandomButton()
+//    }
     
     func incorrectAnimation() {
         for view in self.view.subviews as [UIView] {
@@ -509,11 +491,11 @@ class ViewController: UIViewController {
     }
     
     var nextLevel = false
-    
+    var reset = false
     
     @IBAction func correctButtonDidTap(_ sender: Any) {
         print("\(startingTap)     \(nextLevel)")
-        if !startingTap && !nextLevel {
+        if reset {
             print(level)
             // mebutton color
             CorretButtonColor = randomColor()
@@ -522,7 +504,8 @@ class ViewController: UIViewController {
             life = setStartingLife
             
             createlife()
-            recreateRandomButton()
+//            recreateRandomButton()
+            createRandomButton()
             
             UIView.animate(withDuration: 1, delay: 0, animations: {
                 self.incorrectAnimation()
@@ -530,9 +513,8 @@ class ViewController: UIViewController {
             }, completion: { (finish) in
                 self.startAnimation()
             })
-        }
-        
-        if startingTap {
+            reset = false
+        } else if startingTap {
             
             if !nextLevel {
                 UIView.animate(withDuration: 1, delay: 0, animations: {
