@@ -36,7 +36,7 @@ class ViewController: UIViewController {
     var level: Level = .green
     
     //setting
-    let countRandomButton = 1
+    let countIncorrectButton = 1
     let setStartingLife: Int = 10
     let maxRandomMinusLife: Int = 5
     var life: Int = 0
@@ -62,7 +62,7 @@ class ViewController: UIViewController {
         print(CorretButtonColor)
         
         
-        createRandomButton()
+        createIncorrectButton()
         
         //timer on delay start animation
         //        Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(startAnimation), userInfo: nil, repeats: false)
@@ -81,6 +81,8 @@ class ViewController: UIViewController {
             self.loadingIndicator.isHidden = true
         }
     }
+    
+    
     //MARK:- manage random
     func randomCoor(backView: UIView) -> CGRect {
         let ranW = CGFloat.random(in: 50...150)
@@ -135,6 +137,7 @@ class ViewController: UIViewController {
         return UIColor(red: randomRed, green: randomGreen, blue: randomBlue, alpha: ranAlpha)
     }
     
+    
     //MARK:- manage life
     func createlife() {
         for i in 0 ... (setStartingLife - 1) {
@@ -170,77 +173,10 @@ class ViewController: UIViewController {
         }
     }
     
-    //MARK:- manage game restart
-    func createFailedAndRestart() {
-        var addButton = UIButton()
-        
-        addButton.frame = CGRect(x: 0, y: 0, width: 250, height: 250)
-        addButton.center = view.center
-        addButton.transform = CGAffineTransform(translationX: 0, y: -150)
-        addButton.layer.cornerRadius = addButton.frame.width / 2
-        addButton.setImage(#imageLiteral(resourceName: "GameOver"), for: .normal)
-        addButton.tag = 3
-        addButton.isEnabled = false
-        
-        self.view.addSubview(addButton)
-        
-        addButton = UIButton()
-        
-        addButton.frame = CGRect(x: 0, y: 0, width: 150, height: 150)
-        addButton.center = view.center
-        addButton.transform = CGAffineTransform(translationX: 0, y: 150)
-        addButton.layer.cornerRadius = addButton.frame.width / 2
-        addButton.setImage(#imageLiteral(resourceName: "Restart"), for: .normal)
-        addButton.tag = 4
-        addButton.addTarget(self, action: #selector(restartAction), for: .touchUpInside)
-        
-        self.view.addSubview(addButton)
-    }
     
-    @objc func restartAction(sender: UIButton!) {
-        for view in self.view.subviews as [UIView] {
-            if let btn = view as? UIButton {
-                if (btn.tag == 3) || (btn.tag == 4) {
-                    btn.removeFromSuperview()
-                }
-            }
-        }
-        for view in self.lifeView.subviews as [UIView] {
-            if let btn = view as? UIButton {
-                btn.removeFromSuperview()
-            }
-        }
-        nextLevel = false
-        level = .green
-        
-        saveColorGreen.removeAll()
-        saveColorRed.removeAll()
-        saveColorBlue.removeAll()
-        
-        restart()
-    }
-    
-    func recenterMeButton() {
-        // starting mebutton position
-        meButton.frame = CGRect(x: 0, y: 0, width: 150, height: 150)
-        meButton.center = view.center
-        meButton.layer.cornerRadius = meButton.frame.width / 2
-        meButton.alpha = 1
-    }
-    
-    func restart() {
-        //life button
-        createlife()
-        
-        // starting mebutton position
-        recenterMeButton()
-        
-        reset = true
-    }
-    
-    //MARK:- manage random button
-    func createRandomButton() {
-        for _ in 1...countRandomButton {
+    //MARK:- manage incorrect button
+    func createIncorrectButton() {
+        for _ in 1...countIncorrectButton {
             let addButton = UIButton()
             
             addButton.backgroundColor = randomColor()
@@ -248,7 +184,7 @@ class ViewController: UIViewController {
             addButton.frame = randomCoor(backView: view)
             addButton.layer.cornerRadius = addButton.frame.width / 2
             
-            addButton.addTarget(self, action: #selector(randomButtonAction), for: .touchUpInside)
+            addButton.addTarget(self, action: #selector(incorrectButtonAction), for: .touchUpInside)
             
             addButton.alpha = 0
             
@@ -256,7 +192,7 @@ class ViewController: UIViewController {
         }
     }
     
-    @objc func randomButtonAction(sender: UIButton!) {
+    @objc func incorrectButtonAction(sender: UIButton!) {
         incorrectAction()
     }
     
@@ -270,7 +206,7 @@ class ViewController: UIViewController {
             self.view.backgroundColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
             self.incorrectAnimation()
         }) { (finished) in
-            //self.recreateRandomButton()
+            //self.recreateincorrectButton()
             UIView.animate(withDuration: 0.2, animations: {
                 self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
             }, completion: { (finished) in
@@ -288,7 +224,7 @@ class ViewController: UIViewController {
             //                    self.view.backgroundColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
             //                    self.incorrectAnimation()
             //                }) { (finished) in
-            //                    //self.recreateRandomButton()
+            //                    //self.recreateincorrectButton()
             //                    UIView.animate(withDuration: 0.2, animations: {
             //                        self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
             //                    }, completion: { (finished) in
@@ -304,8 +240,9 @@ class ViewController: UIViewController {
         }
     }
     
-    //MARK:- animation
-    func shuffleRandomButton() {
+    
+    //MARK:- manage animation
+    func shuffleIncorrectButton() {
         let dur: TimeInterval =  0.3
         let times: TimeInterval = 7
         let totalDur: TimeInterval = dur * times
@@ -394,7 +331,7 @@ class ViewController: UIViewController {
                 }
             }
         }) { (finish) in
-            self.shuffleRandomButton()
+            self.shuffleIncorrectButton()
         }
     }
     
@@ -416,59 +353,8 @@ class ViewController: UIViewController {
         self.view.sendSubviewToBack(meButton)
     }
     
-    func playSound(name: String) {
-        let path = Bundle.main.path(forResource: name, ofType: "wav")
-        let url = URL(fileURLWithPath: path ?? "")
-        
-        do {
-            player = try AVAudioPlayer(contentsOf: url)
-            player?.play()
-        } catch let error {
-            print(error.localizedDescription)
-        }
-    }
     
-    func gameOver() {
-        for view in self.view.subviews as [UIView] {
-            if let btn = view as? UIButton {
-                btn.alpha = 0
-            }
-        }
-        
-        createFailedAndRestart()
-    }
-    
-    
-    func correctAction() {
-        playSound(name: "error")
-        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
-        UIView.animate(withDuration: 0.2, animations: {
-            self.view.backgroundColor = #colorLiteral(red: 0, green: 0.9768045545, blue: 0, alpha: 1)
-        }) { (finished) in
-            UIView.animate(withDuration: 0.2, animations: {
-                self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
-            })
-        }
-    }
-    
-    func startNewLevel() {
-        for view in self.view.subviews as [UIView] {
-            if let btn = view as? UIButton {
-                if btn.tag != 1 {
-                    btn.removeFromSuperview()
-                }
-            }
-        }
-        
-//        for view in self.lifeView.subviews as [UIView] {
-//            if let btn = view as? UIButton {
-//                btn.removeFromSuperview()
-//            }
-//        }
-        
-        startingTap = true
-    }
-    
+    //MARK:- correct button
     @IBAction func correctButtonDidTap(_ sender: Any) {
         print("\(startingTap)     \(nextLevel)     \(reset)")
         if reset {
@@ -480,7 +366,7 @@ class ViewController: UIViewController {
             life = setStartingLife
             
             createlife()
-            createRandomButton()
+            createIncorrectButton()
             
             UIView.animate(withDuration: 1, delay: 0, animations: {
                 self.incorrectAnimation()
@@ -500,7 +386,7 @@ class ViewController: UIViewController {
             } else {
                 
                 createlife()
-                createRandomButton()
+                createIncorrectButton()
                 
                 UIView.animate(withDuration: 1) {
                     self.startAnimation()
@@ -539,12 +425,134 @@ class ViewController: UIViewController {
             } else {
                 
                 createlife()
-                createRandomButton()
+                createIncorrectButton()
                 
                 UIView.animate(withDuration: 1) {
                     self.startAnimation()
                 }
             }
+        }
+    }
+    
+    func correctAction() {
+        playSound(name: "error")
+        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
+        UIView.animate(withDuration: 0.2, animations: {
+            self.view.backgroundColor = #colorLiteral(red: 0, green: 0.9768045545, blue: 0, alpha: 1)
+        }) { (finished) in
+            UIView.animate(withDuration: 0.2, animations: {
+                self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
+            })
+        }
+    }
+    
+    func startNewLevel() {
+        for view in self.view.subviews as [UIView] {
+            if let btn = view as? UIButton {
+                if btn.tag != 1 {
+                    btn.removeFromSuperview()
+                }
+            }
+        }
+        
+        //        for view in self.lifeView.subviews as [UIView] {
+        //            if let btn = view as? UIButton {
+        //                btn.removeFromSuperview()
+        //            }
+        //        }
+        
+        startingTap = true
+    }
+    
+    
+    //MARK:- manage game restart
+    func createFailedAndRestart() {
+        var addButton = UIButton()
+        
+        addButton.frame = CGRect(x: 0, y: 0, width: 250, height: 250)
+        addButton.center = view.center
+        addButton.transform = CGAffineTransform(translationX: 0, y: -150)
+        addButton.layer.cornerRadius = addButton.frame.width / 2
+        addButton.setImage(#imageLiteral(resourceName: "GameOver"), for: .normal)
+        addButton.tag = 3
+        addButton.isEnabled = false
+        
+        self.view.addSubview(addButton)
+        
+        addButton = UIButton()
+        
+        addButton.frame = CGRect(x: 0, y: 0, width: 150, height: 150)
+        addButton.center = view.center
+        addButton.transform = CGAffineTransform(translationX: 0, y: 150)
+        addButton.layer.cornerRadius = addButton.frame.width / 2
+        addButton.setImage(#imageLiteral(resourceName: "Restart"), for: .normal)
+        addButton.tag = 4
+        addButton.addTarget(self, action: #selector(restartAction), for: .touchUpInside)
+        
+        self.view.addSubview(addButton)
+    }
+    
+    @objc func restartAction(sender: UIButton!) {
+        for view in self.view.subviews as [UIView] {
+            if let btn = view as? UIButton {
+                if (btn.tag == 3) || (btn.tag == 4) {
+                    btn.removeFromSuperview()
+                }
+            }
+        }
+        for view in self.lifeView.subviews as [UIView] {
+            if let btn = view as? UIButton {
+                btn.removeFromSuperview()
+            }
+        }
+        nextLevel = false
+        level = .green
+        
+        saveColorGreen.removeAll()
+        saveColorRed.removeAll()
+        saveColorBlue.removeAll()
+        
+        restart()
+    }
+    
+    func recenterMeButton() {
+        // starting mebutton position
+        meButton.frame = CGRect(x: 0, y: 0, width: 150, height: 150)
+        meButton.center = view.center
+        meButton.layer.cornerRadius = meButton.frame.width / 2
+        meButton.alpha = 1
+    }
+    
+    func restart() {
+        //life button
+        createlife()
+        
+        // starting mebutton position
+        recenterMeButton()
+        
+        reset = true
+    }
+    
+    func gameOver() {
+        for view in self.view.subviews as [UIView] {
+            if let btn = view as? UIButton {
+                btn.alpha = 0
+            }
+        }
+        
+        createFailedAndRestart()
+    }
+    
+    //MARK:- effect
+    func playSound(name: String) {
+        let path = Bundle.main.path(forResource: name, ofType: "wav")
+        let url = URL(fileURLWithPath: path ?? "")
+        
+        do {
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.play()
+        } catch let error {
+            print(error.localizedDescription)
         }
     }
 }
