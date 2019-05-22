@@ -21,7 +21,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
     @IBOutlet weak var lifeView: UIView!
     
-    var CorretButtonColor: UIColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0)
+    var meButtonColor: UIColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0)
     var saveColorGreen: [CGFloat] = []
     var saveColorRed: [CGFloat] = []
     var saveColorBlue: [CGFloat] = []
@@ -57,9 +57,9 @@ class ViewController: UIViewController {
         recenterMeButton()
         
         // starting mebutton color
-        CorretButtonColor = randomColor()
-        meButton.backgroundColor = CorretButtonColor
-        print(CorretButtonColor)
+        meButtonColor = randomColor()
+        meButton.backgroundColor = meButtonColor
+        print(meButtonColor)
         
         
         createIncorrectButton()
@@ -67,13 +67,12 @@ class ViewController: UIViewController {
         //timer on delay start animation
         //        Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(startAnimation), userInfo: nil, repeats: false)
         
-        
+        //create loading indicator
         loadingIndicator.center = view.center
         
         loadingIndicator.frame = CGRect(x: loadingIndicator.frame.minX, y: meButton.frame.maxY + 100, width: loadingIndicator.frame.width, height: loadingIndicator.frame.height)
         
-        
-        
+        // jumping meButton and
         UIView.animate(withDuration: 0.75, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 25, options: [.curveEaseInOut, .repeat, .autoreverse], animations: {
             UIView.setAnimationRepeatCount(2)
             self.meButton.transform = CGAffineTransform(translationX: 0, y: 50)
@@ -89,7 +88,7 @@ class ViewController: UIViewController {
         let ranH = ranW
         
         let ranX = CGFloat.random(in: 0...(backView.frame.width - ranW))
-        let ranY = CGFloat.random(in: 52...(backView.frame.height - ranH))
+        let ranY = CGFloat.random(in: 72...(backView.frame.height - ranH - 50))
         
         return CGRect(x: ranX, y: ranY, width: ranW, height: ranH)
     }
@@ -100,24 +99,24 @@ class ViewController: UIViewController {
             while (randomRed == color) {
                 randomRed = CGFloat.random(in: 0.5...1.0)
             }
-            saveColorRed.append(randomRed)
         }
+        saveColorRed.append(randomRed)
         
         var randomGreen: CGFloat = CGFloat.random(in: 0.5...1.0)
         for color in saveColorGreen {
             while (randomGreen == color) {
                 randomGreen = CGFloat.random(in: 0.5...1.0)
             }
-            saveColorGreen.append(randomGreen)
         }
+        saveColorGreen.append(randomGreen)
         
         var randomBlue: CGFloat = CGFloat.random(in: 0.5...1.0)
         for color in saveColorBlue {
             while (randomBlue == color) {
                 randomBlue = CGFloat.random(in: 0.5...1.0)
             }
-            saveColorBlue.append(randomGreen)
         }
+        saveColorBlue.append(randomBlue)
         
         let ranAlpha:CGFloat = 1.0
         
@@ -127,11 +126,11 @@ class ViewController: UIViewController {
             randomRed = 0.5
             randomBlue = 0.0
         case .red :
-            randomGreen = 0.5
-            randomBlue = 0.0
+            randomGreen = 0.25
+            randomBlue = 0.25
         case .blue :
-            randomRed = 0.5
-            randomGreen = 0.0
+            randomRed = 0.25
+            randomGreen = 0.25
         }
         
         return UIColor(red: randomRed, green: randomGreen, blue: randomBlue, alpha: ranAlpha)
@@ -157,7 +156,7 @@ class ViewController: UIViewController {
         }
     }
     
-    func lifeViewUpdate() {
+    func lifeUpdate() {
         if life < 0 {
             life = 0
         }
@@ -169,6 +168,7 @@ class ViewController: UIViewController {
                 } else {
                     btn.backgroundColor = nil
                 }
+                btn.alpha = 1
             }
         }
     }
@@ -192,13 +192,28 @@ class ViewController: UIViewController {
         }
     }
     
+    func reappearIncorrectButton() {
+        for view in self.view.subviews as [UIView] {
+            if let btn = view as? UIButton {
+                if (btn.tag != 1) {
+                    UIView.animate(withDuration: 0.2) {
+                        btn.alpha = 1
+                        
+                        btn.backgroundColor = self.randomColor()
+                    }
+                }
+                self.view.sendSubviewToBack(self.meButton)
+            }
+        }
+    }
+    
     @objc func incorrectButtonAction(sender: UIButton!) {
         incorrectAction()
     }
     
     func incorrectAction() {
         life -= Int.random(in: 1 ... maxRandomMinusLife)
-        lifeViewUpdate()
+        lifeUpdate()
         //sound error + animate
         playSound(name: "error")
         AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
@@ -214,34 +229,33 @@ class ViewController: UIViewController {
         }
         //        print(life)
         
-        if life > 0 {
-            //            animateMeAndHideButton()
-            //            self.incorrectAnimation()
-        } else {
-            ////            sleep(1)
-            //            for _ in 1...5 {
-            //                UIView.animate(withDuration: 0.2, animations: {
-            //                    self.view.backgroundColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
-            //                    self.incorrectAnimation()
-            //                }) { (finished) in
-            //                    //self.recreateincorrectButton()
-            //                    UIView.animate(withDuration: 0.2, animations: {
-            //                        self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
-            //                    }, completion: { (finished) in
-            //                    })
-            //                }
-            //
-            ////                sleep(1)
-            //                playSound(name: "error")
-            //                AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
-            //
-            //            }
+        if life <= 0 {
             gameOver()
         }
     }
     
     
     //MARK:- manage animation
+    @objc func startAnimation() {
+        UIView.animate(withDuration: 1, animations: {
+            self.meButton.alpha = 1
+            for view in self.view.subviews as [UIView] {
+                if let btn = view as? UIButton {
+                    if (btn.tag != 1) {
+                        UIView.animate(withDuration: 0.2) {
+                            btn.alpha = 1
+                            
+                            btn.backgroundColor = self.randomColor()
+                        }
+                    }
+                    self.view.sendSubviewToBack(self.meButton)
+                }
+            }
+        }) { (finish) in
+            self.shuffleIncorrectButton()
+        }
+    }
+    
     func shuffleIncorrectButton() {
         let dur: TimeInterval =  0.3
         let times: TimeInterval = 7
@@ -301,11 +315,18 @@ class ViewController: UIViewController {
                 }
             })
         }) { (finish) in
-            self.incorrectAnimation()
-//            self.animateMeAndHideButton()
+            
+            for view in self.view.subviews as [UIView] {
+                if let btn = view as? UIButton {
+                    UIView.animate(withDuration: 0.2) {
+                        btn.frame = self.randomCoor(backView: self.view)
+                        btn.layer.cornerRadius = btn.frame.width / 2
+                    }
+                }
+            }
+            self.view.sendSubviewToBack(self.meButton)
             
             UIView.animate(withDuration: 0.2, animations: {
-                
                 for view in self.lifeView.subviews as [UIView] {
                     if let btn = view as? UIButton {
                         btn.alpha = 1
@@ -315,58 +336,35 @@ class ViewController: UIViewController {
         }
     }
     
-    @objc func startAnimation() {
-        UIView.animate(withDuration: 1, animations: {
-            self.meButton.alpha = 1
-            for view in self.view.subviews as [UIView] {
-                if let btn = view as? UIButton {
-                    if (btn.tag != 1) {
-                        UIView.animate(withDuration: 0.2) {
-                            btn.alpha = 1
-                            
-                            btn.backgroundColor = self.randomColor()
-                        }
-                    }
-                    self.view.sendSubviewToBack(self.meButton)
-                }
-            }
-        }) { (finish) in
-            self.shuffleIncorrectButton()
-        }
-    }
-    
     func incorrectAnimation() {
         for view in self.view.subviews as [UIView] {
             if let btn = view as? UIButton {
-//                if (btn.tag != 1) && (btn.tag != 2) {
-                    UIView.animate(withDuration: 0.2) {
-                        btn.frame = self.randomCoor(backView: self.view)
-                        btn.layer.cornerRadius = btn.frame.width / 2
+                UIView.animate(withDuration: 0.2) {
+                    btn.frame = self.randomCoor(backView: self.view)
+                    btn.layer.cornerRadius = btn.frame.width / 2
+                    if btn.tag != 1 {
                         btn.backgroundColor = self.randomColor()
                     }
-//                } else {
-//                    self.view.sendSubviewToBack(meButton)
-//                }
-                
+                }
             }
         }
         self.view.sendSubviewToBack(meButton)
     }
     
     
-    //MARK:- correct button
-    @IBAction func correctButtonDidTap(_ sender: Any) {
+    //MARK:- manage me button
+    @IBAction func meButtonDidTap(_ sender: Any) {
         print("\(startingTap)     \(nextLevel)     \(reset)")
         if reset {
             print(level)
             // mebutton color
-            CorretButtonColor = randomColor()
-            print(CorretButtonColor)
-            meButton.backgroundColor = CorretButtonColor
+            meButtonColor = randomColor()
+            print(meButtonColor)
+            meButton.backgroundColor = meButtonColor
             life = setStartingLife
-            
             createlife()
             createIncorrectButton()
+//            reappearIncorrectButton()
             
             UIView.animate(withDuration: 1, delay: 0, animations: {
                 self.incorrectAnimation()
@@ -378,15 +376,15 @@ class ViewController: UIViewController {
             
             if !nextLevel {
                 UIView.animate(withDuration: 1, delay: 0, animations: {
-                    self.incorrectAnimation()
+//                    self.incorrectAnimation()
                     self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
                 }, completion: { (finish) in
                     self.startAnimation()
                 })
             } else {
-                
                 createlife()
                 createIncorrectButton()
+//                reappearIncorrectButton()
                 
                 UIView.animate(withDuration: 1) {
                     self.startAnimation()
@@ -394,10 +392,11 @@ class ViewController: UIViewController {
             }
             
             startingTap = false
+            print("\(startingTap)     \(nextLevel)     \(reset)")
         } else {
             if !nextLevel {
                 
-                correctAction()
+                meButtonBackgroundAnimate()
                 view.bringSubviewToFront(meButton)
                 
                 switch level {
@@ -414,27 +413,29 @@ class ViewController: UIViewController {
                 nextLevel = true
                 
                 // mebutton color
-                CorretButtonColor = randomColor()
-                meButton.backgroundColor = CorretButtonColor
+                meButtonColor = randomColor()
+                meButton.backgroundColor = meButtonColor
                 
                 //            life = setStartingLife
                 
                 recenterMeButton()
-                lifeViewUpdate()
+                lifeUpdate()
                 startNewLevel()
             } else {
                 
                 createlife()
                 createIncorrectButton()
+//                reappearIncorrectButton()
                 
                 UIView.animate(withDuration: 1) {
                     self.startAnimation()
                 }
+                nextLevel = false
             }
         }
     }
     
-    func correctAction() {
+    func meButtonBackgroundAnimate() {
         playSound(name: "error")
         AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         UIView.animate(withDuration: 0.2, animations: {
@@ -446,6 +447,14 @@ class ViewController: UIViewController {
         }
     }
     
+    func recenterMeButton() {
+        // starting mebutton position
+        meButton.frame = CGRect(x: 0, y: 0, width: 150, height: 150)
+        meButton.center = view.center
+        meButton.layer.cornerRadius = meButton.frame.width / 2
+        meButton.alpha = 1
+    }
+    
     func startNewLevel() {
         for view in self.view.subviews as [UIView] {
             if let btn = view as? UIButton {
@@ -454,14 +463,6 @@ class ViewController: UIViewController {
                 }
             }
         }
-        
-        //        for view in self.lifeView.subviews as [UIView] {
-        //            if let btn = view as? UIButton {
-        //                btn.removeFromSuperview()
-        //            }
-        //        }
-        
-        startingTap = true
     }
     
     
@@ -495,7 +496,7 @@ class ViewController: UIViewController {
     @objc func restartAction(sender: UIButton!) {
         for view in self.view.subviews as [UIView] {
             if let btn = view as? UIButton {
-                if (btn.tag == 3) || (btn.tag == 4) {
+                if btn.tag != 1 {
                     btn.removeFromSuperview()
                 }
             }
@@ -505,26 +506,21 @@ class ViewController: UIViewController {
                 btn.removeFromSuperview()
             }
         }
+        
         nextLevel = false
         level = .green
-        
         saveColorGreen.removeAll()
         saveColorRed.removeAll()
         saveColorBlue.removeAll()
+        meButton.backgroundColor = randomColor()
         
         restart()
     }
     
-    func recenterMeButton() {
-        // starting mebutton position
-        meButton.frame = CGRect(x: 0, y: 0, width: 150, height: 150)
-        meButton.center = view.center
-        meButton.layer.cornerRadius = meButton.frame.width / 2
-        meButton.alpha = 1
-    }
-    
     func restart() {
         //life button
+        life = setStartingLife
+//        lifeUpdate()
         createlife()
         
         // starting mebutton position
@@ -539,6 +535,12 @@ class ViewController: UIViewController {
                 btn.alpha = 0
             }
         }
+        
+//        for view in self.lifeView.subviews as [UIView] {
+//            if let btn = view as? UIButton {
+//                btn.alpha = 0
+//            }
+//        }
         
         createFailedAndRestart()
     }

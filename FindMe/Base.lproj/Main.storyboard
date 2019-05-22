@@ -23,7 +23,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.53333333329999999" green="0.33557784559999998" blue="0.1058001444" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <connections>
-                                    <action selector="correctButtonDidTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="unp-il-vvo"/>
+                                    <action selector="meButtonDidTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="unp-il-vvo"/>
                                 </connections>
                             </button>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" animating="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="Ayo-tP-YWe">
