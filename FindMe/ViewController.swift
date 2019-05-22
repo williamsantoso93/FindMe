@@ -38,7 +38,7 @@ class ViewController: UIViewController {
     var gameTimer: Timer = Timer()
     
     //setting
-    let countIncorrectButton = 14
+    let countIncorrectButton = 9
     let setStartingLife: Int = 10
     let maxRandomMinusLife: Int = 5
     var life: Int = 0
@@ -247,7 +247,7 @@ class ViewController: UIViewController {
         if life <= 0 {
             gameOver()
         } else {
-            resetTimer()
+//            resetTimer()
         }
     }
     
@@ -350,8 +350,8 @@ class ViewController: UIViewController {
                     }
                 }
             })
-            self.remainingTime.alpha = 1
-            self.runTimer()
+//            self.remainingTime.alpha = 1
+//            self.runTimer()
         }
     }
     
@@ -379,6 +379,7 @@ class ViewController: UIViewController {
             meButton.backgroundColor = meButtonColor
             life = setStartingLife
             createlife()
+            lifeUpdate()
             createIncorrectButton()
             
             UIView.animate(withDuration: 1, delay: 0, animations: {
@@ -397,6 +398,7 @@ class ViewController: UIViewController {
                 })
             } else {
                 createlife()
+                lifeUpdate()
                 createIncorrectButton()
                 
                 UIView.animate(withDuration: 1) {
@@ -433,6 +435,7 @@ class ViewController: UIViewController {
                 
                 //start next level
                 createlife()
+                lifeUpdate()
                 createIncorrectButton()
                 
                 UIView.animate(withDuration: 1) {
@@ -527,7 +530,7 @@ class ViewController: UIViewController {
     
     func restart() {
         //life button
-        life = setStartingLife
+//        life = setStartingLife
         createlife()
         
         // starting mebutton position
