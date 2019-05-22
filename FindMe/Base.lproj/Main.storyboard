@@ -26,14 +26,6 @@
                                     <action selector="correctButtonDidTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="unp-il-vvo"/>
                                 </connections>
                             </button>
-                            <button hidden="YES" opaque="NO" tag="2" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CYH-SU-Ksv">
-                                <rect key="frame" x="201" y="571" width="75" height="75"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" red="0.51372549020000002" green="0.33556681869999999" blue="0.1058013365" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                <connections>
-                                    <action selector="hideButtonDidTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="XAI-gM-RRX"/>
-                                </connections>
-                            </button>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" animating="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="Ayo-tP-YWe">
                                 <rect key="frame" x="166" y="487" width="20" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -47,7 +39,6 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
-                        <outlet property="hideButton" destination="CYH-SU-Ksv" id="OhP-kX-vWu"/>
                         <outlet property="lifeView" destination="Cmv-0N-gee" id="XxM-st-hqL"/>
                         <outlet property="loadingIndicator" destination="Ayo-tP-YWe" id="ukm-fT-wxz"/>
                         <outlet property="meButton" destination="psI-Ey-f6I" id="iQZ-rz-1I5"/>

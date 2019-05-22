@@ -18,18 +18,25 @@ enum Level {
 
 class ViewController: UIViewController {
     @IBOutlet weak var meButton: UIButton!
-    @IBOutlet weak var hideButton: UIButton!
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
     @IBOutlet weak var lifeView: UIView!
     
     var CorretButtonColor: UIColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0)
+    var saveColorGreen: [CGFloat] = []
+    var saveColorRed: [CGFloat] = []
+    var saveColorBlue: [CGFloat] = []
+    
+    var player: AVAudioPlayer?
     
     var startingTap = true
+    
+    var nextLevel = false
+    var reset = false
     
     var level: Level = .green
     
     //setting
-    let countBubble = 1
+    let countRandomButton = 1
     let setStartingLife: Int = 10
     let maxRandomMinusLife: Int = 5
     var life: Int = 0
@@ -52,27 +59,8 @@ class ViewController: UIViewController {
         // starting mebutton color
         CorretButtonColor = randomColor()
         meButton.backgroundColor = CorretButtonColor
+        print(CorretButtonColor)
         
-        //staring hidebutton position & color + hidden
-        hideButton.frame = CGRect(x: meButton.frame.minX + 25, y: meButton.frame.minY + 25, width: meButton.frame.width + 10, height: meButton.frame.height + 10)
-        hideButton.layer.cornerRadius = hideButton.frame.width / 2
-        
-        //get mebutton color
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        CorretButtonColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-        
-        if green < 1.0 {
-            green += 0.02
-        } else {
-            green -= 0.02
-        }
-        
-        //staring hidebutton color + hidden
-        hideButton.backgroundColor = UIColor(red: red, green: green, blue: blue, alpha: alpha)
-        hideButton.isHidden = true
         
         createRandomButton()
         
@@ -93,7 +81,61 @@ class ViewController: UIViewController {
             self.loadingIndicator.isHidden = true
         }
     }
+    //MARK:- manage random
+    func randomCoor(backView: UIView) -> CGRect {
+        let ranW = CGFloat.random(in: 50...150)
+        let ranH = ranW
+        
+        let ranX = CGFloat.random(in: 0...(backView.frame.width - ranW))
+        let ranY = CGFloat.random(in: 52...(backView.frame.height - ranH))
+        
+        return CGRect(x: ranX, y: ranY, width: ranW, height: ranH)
+    }
     
+    func randomColor() -> UIColor {
+        var randomRed: CGFloat = CGFloat.random(in: 0.5...1.0)
+        for color in saveColorRed {
+            while (randomRed == color) {
+                randomRed = CGFloat.random(in: 0.5...1.0)
+            }
+            saveColorRed.append(randomRed)
+        }
+        
+        var randomGreen: CGFloat = CGFloat.random(in: 0.5...1.0)
+        for color in saveColorGreen {
+            while (randomGreen == color) {
+                randomGreen = CGFloat.random(in: 0.5...1.0)
+            }
+            saveColorGreen.append(randomGreen)
+        }
+        
+        var randomBlue: CGFloat = CGFloat.random(in: 0.5...1.0)
+        for color in saveColorBlue {
+            while (randomBlue == color) {
+                randomBlue = CGFloat.random(in: 0.5...1.0)
+            }
+            saveColorBlue.append(randomGreen)
+        }
+        
+        let ranAlpha:CGFloat = 1.0
+        
+        
+        switch level {
+        case .green :
+            randomRed = 0.5
+            randomBlue = 0.0
+        case .red :
+            randomGreen = 0.5
+            randomBlue = 0.0
+        case .blue :
+            randomRed = 0.5
+            randomGreen = 0.0
+        }
+        
+        return UIColor(red: randomRed, green: randomGreen, blue: randomBlue, alpha: ranAlpha)
+    }
+    
+    //MARK:- manage life
     func createlife() {
         for i in 0 ... (setStartingLife - 1) {
             let lifeButton = UIButton()
@@ -128,6 +170,7 @@ class ViewController: UIViewController {
         }
     }
     
+    //MARK:- manage game restart
     func createFailedAndRestart() {
         var addButton = UIButton()
         
@@ -195,7 +238,74 @@ class ViewController: UIViewController {
         reset = true
     }
     
-    func shuffleBubble() {
+    //MARK:- manage random button
+    func createRandomButton() {
+        for _ in 1...countRandomButton {
+            let addButton = UIButton()
+            
+            addButton.backgroundColor = randomColor()
+            
+            addButton.frame = randomCoor(backView: view)
+            addButton.layer.cornerRadius = addButton.frame.width / 2
+            
+            addButton.addTarget(self, action: #selector(randomButtonAction), for: .touchUpInside)
+            
+            addButton.alpha = 0
+            
+            self.view.addSubview(addButton)
+        }
+    }
+    
+    @objc func randomButtonAction(sender: UIButton!) {
+        incorrectAction()
+    }
+    
+    func incorrectAction() {
+        life -= Int.random(in: 1 ... maxRandomMinusLife)
+        lifeViewUpdate()
+        //sound error + animate
+        playSound(name: "error")
+        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
+        UIView.animate(withDuration: 0.2, animations: {
+            self.view.backgroundColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
+            self.incorrectAnimation()
+        }) { (finished) in
+            //self.recreateRandomButton()
+            UIView.animate(withDuration: 0.2, animations: {
+                self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
+            }, completion: { (finished) in
+            })
+        }
+        //        print(life)
+        
+        if life > 0 {
+            //            animateMeAndHideButton()
+            //            self.incorrectAnimation()
+        } else {
+            ////            sleep(1)
+            //            for _ in 1...5 {
+            //                UIView.animate(withDuration: 0.2, animations: {
+            //                    self.view.backgroundColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
+            //                    self.incorrectAnimation()
+            //                }) { (finished) in
+            //                    //self.recreateRandomButton()
+            //                    UIView.animate(withDuration: 0.2, animations: {
+            //                        self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
+            //                    }, completion: { (finished) in
+            //                    })
+            //                }
+            //
+            ////                sleep(1)
+            //                playSound(name: "error")
+            //                AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
+            //
+            //            }
+            gameOver()
+        }
+    }
+    
+    //MARK:- animation
+    func shuffleRandomButton() {
         let dur: TimeInterval =  0.3
         let times: TimeInterval = 7
         let totalDur: TimeInterval = dur * times
@@ -255,7 +365,7 @@ class ViewController: UIViewController {
             })
         }) { (finish) in
             self.incorrectAnimation()
-            self.animateMeAndHideButton()
+//            self.animateMeAndHideButton()
             
             UIView.animate(withDuration: 0.2, animations: {
                 
@@ -284,112 +394,27 @@ class ViewController: UIViewController {
                 }
             }
         }) { (finish) in
-            self.shuffleBubble()
+            self.shuffleRandomButton()
         }
     }
-    
-    
-    func randomCoor(backView: UIView) -> CGRect {
-        let ranW = CGFloat.random(in: 50...150)
-        let ranH = ranW
-        
-        let ranX = CGFloat.random(in: 0...(backView.frame.width - ranW))
-        let ranY = CGFloat.random(in: 52...(backView.frame.height - ranH))
-        
-        return CGRect(x: ranX, y: ranY, width: ranW, height: ranH)
-    }
-    
-    var saveColorGreen: [CGFloat] = []
-    var saveColorRed: [CGFloat] = []
-    var saveColorBlue: [CGFloat] = []
-    
-    func randomColor() -> UIColor {
-        var randomRed: CGFloat = CGFloat.random(in: 0.5...1.0)
-        for color in saveColorRed {
-            while (randomRed == color) {
-                randomRed = CGFloat.random(in: 0.5...1.0)
-            }
-            saveColorRed.append(randomRed)
-        }
-        
-        var randomGreen: CGFloat = CGFloat.random(in: 0.5...1.0)
-        for color in saveColorGreen {
-            while (randomGreen == color) {
-                randomGreen = CGFloat.random(in: 0.5...1.0)
-            }
-            saveColorGreen.append(randomGreen)
-        }
-        
-        var randomBlue: CGFloat = CGFloat.random(in: 0.5...1.0)
-        for color in saveColorBlue {
-            while (randomBlue == color) {
-                randomBlue = CGFloat.random(in: 0.5...1.0)
-            }
-            saveColorBlue.append(randomGreen)
-        }
-        
-        let ranAlpha:CGFloat = 1.0
-        
-        
-        switch level {
-        case .green :
-            randomRed = 0.5
-            randomBlue = 0.0
-        case .red :
-            randomGreen = 0.5
-            randomBlue = 0.0
-        case .blue :
-            randomRed = 0.5
-            randomGreen = 0.0
-        }
-        
-        return UIColor(red: randomRed, green: randomGreen, blue: randomBlue, alpha: ranAlpha)
-    }
-    
-    func createRandomButton() {
-        for _ in 1...countBubble {
-            let addButton = UIButton()
-            
-            addButton.backgroundColor = randomColor()
-            
-            addButton.frame = randomCoor(backView: view)
-            addButton.layer.cornerRadius = addButton.frame.width / 2
-            
-            addButton.addTarget(self, action: #selector(bubbleAction), for: .touchUpInside)
-            
-            addButton.alpha = 0
-            
-            self.view.addSubview(addButton)
-        }
-    }
-    
-//    func recreateRandomButton() {
-//        for view in view.subviews{
-//            if view.tag != 1 {
-//                view.removeFromSuperview()
-//            }
-//        }
-//
-//        createRandomButton()
-//    }
     
     func incorrectAnimation() {
         for view in self.view.subviews as [UIView] {
             if let btn = view as? UIButton {
-                if (btn.tag != 1) && (btn.tag != 2) {
+//                if (btn.tag != 1) && (btn.tag != 2) {
                     UIView.animate(withDuration: 0.2) {
                         btn.frame = self.randomCoor(backView: self.view)
                         btn.layer.cornerRadius = btn.frame.width / 2
                         btn.backgroundColor = self.randomColor()
                     }
-                } else {
-                    self.view.sendSubviewToBack(meButton)
-                }
+//                } else {
+//                    self.view.sendSubviewToBack(meButton)
+//                }
+                
             }
         }
+        self.view.sendSubviewToBack(meButton)
     }
-    
-    var player: AVAudioPlayer?
     
     func playSound(name: String) {
         let path = Bundle.main.path(forResource: name, ofType: "wav")
@@ -403,49 +428,6 @@ class ViewController: UIViewController {
         }
     }
     
-    func incorrectAction() {
-        life -= Int.random(in: 1 ... maxRandomMinusLife)
-        lifeViewUpdate()
-        //sound error + animate
-        playSound(name: "error")
-        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
-        UIView.animate(withDuration: 0.2, animations: {
-            self.view.backgroundColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
-            self.incorrectAnimation()
-        }) { (finished) in
-            //self.recreateRandomButton()
-            UIView.animate(withDuration: 0.2, animations: {
-                self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
-            }, completion: { (finished) in
-            })
-        }
-//        print(life)
-        
-        if life > 0 {
-            animateMeAndHideButton()
-        } else {
-////            sleep(1)
-//            for _ in 1...5 {
-//                UIView.animate(withDuration: 0.2, animations: {
-//                    self.view.backgroundColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
-//                    self.incorrectAnimation()
-//                }) { (finished) in
-//                    //self.recreateRandomButton()
-//                    UIView.animate(withDuration: 0.2, animations: {
-//                        self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
-//                    }, completion: { (finished) in
-//                    })
-//                }
-//
-////                sleep(1)
-//                playSound(name: "error")
-//                AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
-//
-//            }
-            gameOver()
-        }
-    }
-    
     func gameOver() {
         for view in self.view.subviews as [UIView] {
             if let btn = view as? UIButton {
@@ -456,9 +438,6 @@ class ViewController: UIViewController {
         createFailedAndRestart()
     }
     
-    @objc func bubbleAction(sender: UIButton!) {
-        incorrectAction()
-    }
     
     func correctAction() {
         playSound(name: "error")
@@ -490,11 +469,8 @@ class ViewController: UIViewController {
         startingTap = true
     }
     
-    var nextLevel = false
-    var reset = false
-    
     @IBAction func correctButtonDidTap(_ sender: Any) {
-        print("\(startingTap)     \(nextLevel)")
+        print("\(startingTap)     \(nextLevel)     \(reset)")
         if reset {
             print(level)
             // mebutton color
@@ -504,12 +480,10 @@ class ViewController: UIViewController {
             life = setStartingLife
             
             createlife()
-//            recreateRandomButton()
             createRandomButton()
             
             UIView.animate(withDuration: 1, delay: 0, animations: {
                 self.incorrectAnimation()
-//                self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
             }, completion: { (finish) in
                 self.startAnimation()
             })
@@ -572,22 +546,6 @@ class ViewController: UIViewController {
                 }
             }
         }
-    }
-    
-    func animateMeAndHideButton() {
-        UIView.animate(withDuration: 0.2) {
-            let randomXY = self.randomCoor(backView: self.view)
-            
-            self.meButton.frame = randomXY
-            self.meButton.layer.cornerRadius = self.meButton.frame.width / 2
-            
-//            self.hideButton.frame = CGRect(x: self.meButton.frame.minX + 25, y: self.meButton.frame.minY + 25, width: self.meButton.frame.width + 10, height: self.meButton.frame.height + 10)
-//            self.hideButton.layer.cornerRadius = self.hideButton.frame.width / 2
-        }
-    }
-    
-    @IBAction func hideButtonDidTap(_ sender: Any) {
-        incorrectAction()
     }
 }
 
