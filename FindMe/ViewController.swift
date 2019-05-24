@@ -43,6 +43,8 @@ class ViewController: UIViewController {
     let maxRandomMinusLife: Int = 5
     var life: Int = 0
     let oneCycleTime: Float = 5
+    let timerInterval: Float = 1/100
+    
     
     override var prefersStatusBarHidden: Bool {
         return true
@@ -68,10 +70,8 @@ class ViewController: UIViewController {
         
 //        remainingTime.setProgress(true, animated: true)
         remainingTime.alpha = 0
-        remainingTime.setProgress(1, animated: true)
+        remainingTime.setProgress(1, animated: false)
 //        remainingTime.progress = 1
-        //timer on delay start animation
-//        runTimer()
         
         //create loading indicator
         loadingIndicator.center = view.center
@@ -89,15 +89,16 @@ class ViewController: UIViewController {
     
     //MARK:- manage game timer
     func runTimer() {
-        gameTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(countdownTimer(timer:)), userInfo: nil, repeats: true)
+        remainingTime.alpha = 1
+        gameTimer = Timer.scheduledTimer(timeInterval: TimeInterval(timerInterval), target: self, selector: #selector(countdownTimer(timer:)), userInfo: nil, repeats: true)
     }
     
     @objc func countdownTimer(timer: Timer) {
-        let decreaseTime = 1 / oneCycleTime
-        print(decreaseTime)
+//        let decreaseTime = 1 / oneCycleTime
+//        print(decreaseTime)
         if remainingTime.progress > 0 {
 //            remainingTime.progress -= decreaseTime
-            remainingTime.setProgress((remainingTime.progress - decreaseTime), animated: true)
+            remainingTime.setProgress((remainingTime.progress - (timerInterval / oneCycleTime)), animated: false)
         } else {
             gameTimer.invalidate()
             print("finish")
@@ -351,7 +352,7 @@ class ViewController: UIViewController {
                 }
             })
 //            self.remainingTime.alpha = 1
-//            self.runTimer()
+            self.runTimer()
         }
     }
     
