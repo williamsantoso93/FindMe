@@ -38,11 +38,11 @@ class ViewController: UIViewController {
     var gameTimer: Timer = Timer()
     
     //setting
-    let countIncorrectButton = 9
+    var countIncorrectButton = 9
     let setStartingLife: Int = 10
     let maxRandomMinusLife: Int = 5
     var life: Int = 0
-    let oneCycleTime: Float = 5
+    let oneCycleTime: Float = 2.5
     let timerInterval: Float = 1/100
     
     
@@ -101,14 +101,14 @@ class ViewController: UIViewController {
             remainingTime.setProgress((remainingTime.progress - (timerInterval / oneCycleTime)), animated: false)
         } else {
             gameTimer.invalidate()
-            print("finish")
+//            print("finish")
             incorrectAction()
         }
-        print(remainingTime.progress)
+//        print(remainingTime.progress)
     }
     
     func resetTimer() {
-        remainingTime.setProgress(1, animated: true)
+        remainingTime.setProgress(1, animated: false)
         runTimer()
     }
     
@@ -244,11 +244,13 @@ class ViewController: UIViewController {
             })
         }
         
+        gameTimer.invalidate()
         
         if life <= 0 {
+//            gameTimer.invalidate()
             gameOver()
         } else {
-//            resetTimer()
+            resetTimer()
         }
     }
     
@@ -372,8 +374,9 @@ class ViewController: UIViewController {
     }
     
     
-    //MARK:- manage me button
+    //MARK:- manage meButton
     @IBAction func meButtonDidTap(_ sender: Any) {
+        gameTimer.invalidate()
         if reset {
             // mebutton color
             meButtonColor = randomColor()
@@ -390,7 +393,7 @@ class ViewController: UIViewController {
             })
             reset = false
         } else if startingTap {
-            
+            //first time start game
             if !nextLevel {
                 UIView.animate(withDuration: 1, delay: 0, animations: {
                     self.view.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
@@ -411,16 +414,21 @@ class ViewController: UIViewController {
         } else {
             if !nextLevel {
                 //win level
+                remainingTime.alpha = 0
+                remainingTime.setProgress(1, animated: false)
                 meButtonBackgroundAnimate()
                 view.bringSubviewToFront(meButton)
                 
                 switch level {
                 case .green :
                     level = .red
+                    countIncorrectButton += 5
                 case .red :
                     level = .blue
+                    countIncorrectButton += 5
                 case .blue :
                     level = .green
+                    countIncorrectButton += 5
                 }
                 
                 nextLevel = true
@@ -541,6 +549,7 @@ class ViewController: UIViewController {
     }
     
     func gameOver() {
+        remainingTime.alpha = 0
         for view in self.view.subviews as [UIView] {
             if let btn = view as? UIButton {
                 btn.alpha = 0
