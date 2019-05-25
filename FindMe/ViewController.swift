@@ -38,17 +38,25 @@ class ViewController: UIViewController {
     var gameTimer: Timer = Timer()
     
     //setting
+    let startCountIncorrectButton = 9
     var countIncorrectButton = 9
     let setStartingLife: Int = 10
     let maxRandomMinusLife: Int = 5
     var life: Int = 0
-    let oneCycleTime: Float = 2.5
+    let startOneCycleTime: Float = 2.5
+    var oneCycleTime: Float = 2.5
     let timerInterval: Float = 1/100
     
-    
+    //hide status bar
     override var prefersStatusBarHidden: Bool {
         return true
     }
+    
+    //hide home button
+    override var prefersHomeIndicatorAutoHidden: Bool {
+        return true
+    }
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -379,8 +387,10 @@ class ViewController: UIViewController {
         gameTimer.invalidate()
         if reset {
             // mebutton color
-            meButtonColor = randomColor()
-            meButton.backgroundColor = meButtonColor
+//            meButtonColor = randomColor()
+//            meButton.backgroundColor = meButtonColor
+            countIncorrectButton = startCountIncorrectButton
+            oneCycleTime = startOneCycleTime
             life = setStartingLife
             createlife()
             lifeUpdate()
@@ -423,12 +433,19 @@ class ViewController: UIViewController {
                 case .green :
                     level = .red
                     countIncorrectButton += 5
+                    oneCycleTime -= 0.5
                 case .red :
                     level = .blue
                     countIncorrectButton += 5
+                    oneCycleTime -= 0.5
                 case .blue :
                     level = .green
                     countIncorrectButton += 5
+                    oneCycleTime -= 0.5
+                }
+                
+                if oneCycleTime < 0.7 {
+                    oneCycleTime = 0.5
                 }
                 
                 nextLevel = true
@@ -532,7 +549,10 @@ class ViewController: UIViewController {
         saveColorGreen.removeAll()
         saveColorRed.removeAll()
         saveColorBlue.removeAll()
-        meButton.backgroundColor = randomColor()
+//        meButton.backgroundColor = randomColor()
+
+        meButtonColor = randomColor()
+        meButton.backgroundColor = meButtonColor
         
         restart()
     }
