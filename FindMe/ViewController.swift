@@ -76,10 +76,9 @@ class ViewController: UIViewController {
         
         createIncorrectButton()
         
-//        remainingTime.setProgress(true, animated: true)
+        //setting remaining time
         remainingTime.alpha = 0
         remainingTime.setProgress(1, animated: false)
-//        remainingTime.progress = 1
         
         //create loading indicator
         loadingIndicator.center = view.center
@@ -102,17 +101,12 @@ class ViewController: UIViewController {
     }
     
     @objc func countdownTimer(timer: Timer) {
-//        let decreaseTime = 1 / oneCycleTime
-//        print(decreaseTime)
         if remainingTime.progress > 0 {
-//            remainingTime.progress -= decreaseTime
             remainingTime.setProgress((remainingTime.progress - (timerInterval / oneCycleTime)), animated: false)
         } else {
             gameTimer.invalidate()
-//            print("finish")
             incorrectAction()
         }
-//        print(remainingTime.progress)
     }
     
     func resetTimer() {
@@ -255,7 +249,6 @@ class ViewController: UIViewController {
         gameTimer.invalidate()
         
         if life <= 0 {
-//            gameTimer.invalidate()
             gameOver()
         } else {
             resetTimer()
@@ -361,7 +354,6 @@ class ViewController: UIViewController {
                     }
                 }
             })
-//            self.remainingTime.alpha = 1
             self.runTimer()
         }
     }
@@ -386,9 +378,6 @@ class ViewController: UIViewController {
     @IBAction func meButtonDidTap(_ sender: Any) {
         gameTimer.invalidate()
         if reset {
-            // mebutton color
-//            meButtonColor = randomColor()
-//            meButton.backgroundColor = meButtonColor
             countIncorrectButton = startCountIncorrectButton
             oneCycleTime = startOneCycleTime
             life = setStartingLife
@@ -549,7 +538,6 @@ class ViewController: UIViewController {
         saveColorGreen.removeAll()
         saveColorRed.removeAll()
         saveColorBlue.removeAll()
-//        meButton.backgroundColor = randomColor()
 
         meButtonColor = randomColor()
         meButton.backgroundColor = meButtonColor
@@ -559,7 +547,6 @@ class ViewController: UIViewController {
     
     func restart() {
         //life button
-//        life = setStartingLife
         createlife()
         
         // starting mebutton position
